@@ -24,13 +24,93 @@ namespace WzComparerR2.Common
                 return false;
             this.Clear();
             int id;
-            foreach (Wz_Node node in stringWz.Node.Nodes)
+
+            //此处老丁子调整 start
+            //非stringwz的尝试找下String节点 老丁子
+            Wz_Node stringNode = null;
+            if (stringWz.Type != Wz_Type.String)
+            {
+                stringNode = stringWz.Node.FindNodeByPath("String");
+            }
+            else
+            {
+                stringNode = stringWz.Node;
+            }
+            if (stringNode == null)
+            {
+                return false;
+            }
+            //此处老丁子调整 end
+
+            foreach (Wz_Node node in stringNode.Nodes)
             {
                 Wz_Image image = node.Value as Wz_Image;
                 if (image == null)
                     continue;
                 switch (node.Text)
                 {
+                    //此处老丁子调整 start
+                    case "Item.img":
+                        if (!image.TryExtract()) break;
+                        foreach (Wz_Node item in image.Node.Nodes)
+                        {
+                            switch (item.Text)
+                            {
+                                case "Pet":
+                                case "Ins":
+                                case "Con":
+                                    foreach (Wz_Node tree in item.Nodes)
+                                    {
+                                        if (Int32.TryParse(tree.Text, out id))
+                                        {
+                                            StringResult strResult = new StringResult();
+                                            strResult.Name = GetDefaultString(tree, "name");
+                                            strResult.Desc = GetDefaultString(tree, "desc");
+                                            strResult.AutoDesc = GetDefaultString(tree, "autodesc");
+                                            strResult.FullPath = tree.FullPath;
+
+                                            AddAllValue(strResult, tree);
+                                            stringItem[id] = strResult;
+                                        }
+                                    }
+                                    break;
+                                case "Eqp":
+                                    foreach (Wz_Node tree0 in item.Nodes)
+                                    {
+                                        foreach (Wz_Node tree in tree0.Nodes)
+                                        {
+                                            if (Int32.TryParse(tree.Text, out id))
+                                            {
+                                                StringResult strResult = new StringResult();
+                                                strResult.Name = GetDefaultString(tree, "name");
+                                                strResult.Desc = GetDefaultString(tree, "desc");
+                                                strResult.FullPath = tree.FullPath;
+
+                                                AddAllValue(strResult, tree);
+                                                stringEqp[id] = strResult;
+                                            }
+                                        }
+                                    }
+                                    break;
+                                case "Etc":
+                                    foreach (Wz_Node tree in item.Nodes)
+                                    {
+                                        if (Int32.TryParse(tree.Text, out id))
+                                        {
+                                            StringResult strResult = new StringResult();
+                                            strResult.Name = GetDefaultString(tree, "name");
+                                            strResult.Desc = GetDefaultString(tree, "desc");
+                                            strResult.FullPath = tree.FullPath;
+
+                                            AddAllValue(strResult, tree);
+                                            stringItem[id] = strResult;
+                                        }
+                                    }
+                                    break;
+                            }
+                        }
+                        break;
+                    //此处老丁子调整 end
                     case "Pet.img":
                     case "Cash.img":
                     case "Ins.img":

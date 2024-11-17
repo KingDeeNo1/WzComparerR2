@@ -27,6 +27,7 @@ using WzComparerR2.Rendering;
 using WzComparerR2.Config;
 using WzComparerR2.Animation;
 using static Microsoft.Xna.Framework.MathHelper;
+using WzComparerR2.DingCakeExtend;
 
 namespace WzComparerR2
 {
@@ -1966,13 +1967,25 @@ namespace WzComparerR2
         {
             foreach (Wz_Structure wz in openedWz)
             {
-                foreach (Wz_File file in wz.wz_files)
+                //此处老丁子调整 start
+                if (wz.has_basewz)
                 {
-                    if (file.Type == Wz_Type.String)
+                    foreach (Wz_File file in wz.wz_files)
                     {
-                        return file;
+                        if (file.Type == Wz_Type.String)
+                        {
+                            return file;
+                        }
                     }
                 }
+                else
+                {
+                    if (wz.wz_files.Count > 0)
+                    {
+                        return wz.wz_files[0];
+                    }
+                }
+                //此处老丁子调整 end
             }
             return null;
         }
@@ -2985,7 +2998,38 @@ namespace WzComparerR2
 
         private void buttonItemAbout_Click(object sender, EventArgs e)
         {
-            new FrmAbout().ShowDialog();
+            //new FrmAbout().ShowDialog();
+            if (advTree1.Nodes.Count == 0)
+            {
+                MessageBoxEx.Show("请打开wz", "喵~");
+                return;
+            }
+
+            Wz_Node find_Wz_Node = null;
+
+            foreach (Node node in advTree1.Nodes)
+            {
+                Wz_Node wz_Node = node.AsWzNode();
+                if (wz_Node != null)
+                {
+                    find_Wz_Node = wz_Node;
+                }
+            }
+
+            FolderBrowserDialog folderBrowser = new FolderBrowserDialog();
+
+            // 显示对话框并获取用户选择的文件夹路径
+            DialogResult result = folderBrowser.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+
+                string folderPath = folderBrowser.SelectedPath;
+                ExportManagerHolder exportManagerHolder = new ExportManagerHolder();
+                exportManagerHolder.ExportFolderRootPath = folderPath;
+                exportManagerHolder.WzRootNode = find_Wz_Node;
+                exportManagerHolder.StartExport();
+                this.labelItemStatus.Text = "老丁子导出成功。";
+            }
         }
 
         private void btnExportSkill_Click(object sender, EventArgs e)

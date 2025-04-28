@@ -3022,11 +3022,23 @@ namespace WzComparerR2
             DialogResult result = folderBrowser.ShowDialog();
             if (result == DialogResult.OK)
             {
-
+                DialogResult chooseResult = MessageBoxEx.Show("导出模式 YES:客户端信息 NO:服务端信息", "选择", MessageBoxButtons.YesNoCancel);
                 string folderPath = folderBrowser.SelectedPath;
                 ExportManagerHolder exportManagerHolder = new ExportManagerHolder();
                 exportManagerHolder.ExportFolderRootPath = folderPath;
                 exportManagerHolder.WzRootNode = find_Wz_Node;
+                if (chooseResult == DialogResult.Yes)
+                {
+                    exportManagerHolder.Mode = 0;
+                }
+                else if (chooseResult == DialogResult.No)
+                {
+                    exportManagerHolder.Mode = 1;
+                }
+                else
+                {
+                    return;
+                }
                 exportManagerHolder.StartExport();
                 this.labelItemStatus.Text = "老丁子导出成功。";
             }
